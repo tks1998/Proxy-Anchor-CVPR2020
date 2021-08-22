@@ -228,7 +228,7 @@ if args.gpu_id == -1:
 if args.loss == 'Proxy_Anchor':
     criterion = losses.Proxy_Anchor(nb_classes = nb_classes, sz_embed = args.sz_embedding, mrg = args.mrg, alpha = args.alpha).cuda()
 if args.loss == 'AdaptiveProxyAnchorLoss':
-    criterion = losses.AdaptiveProxyAnchorLoss(nb_classes=nb_classes, sz_embed=args.sz_embedding, mrg=args.mrg,alpha=args.alpha\
+    criterion = losses.AdaptiveProxyAnchorLoss(nb_classes=nb_classes, sz_embed=args.sz_embedding, mrg=args.mrg,alpha=args.alpha,\
                                                nb_proxies=args.nb_proxies,scale_margin=args.scale_margin).cuda()
 elif args.loss == 'Proxy_NCA':
     criterion = losses.Proxy_NCA(nb_classes = nb_classes, sz_embed = args.sz_embedding).cuda()
