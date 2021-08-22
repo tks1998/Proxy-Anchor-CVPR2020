@@ -78,6 +78,12 @@ parser.add_argument('--alpha', default = 32, type = float,
 parser.add_argument('--mrg', default = 0.1, type = float,
     help = 'Margin parameter setting'
 )
+parser.add_argument('--nb_proxies', default = 1, type = float,
+    help = 'Num proxy'
+)
+parser.add_argument('--scale_margin', default = 10, type = float,
+    help = 'scale_margin'
+)
 parser.add_argument('--IPC', type = int,
     help = 'Balanced sampling, images per class'
 )
@@ -221,6 +227,9 @@ if args.gpu_id == -1:
 # DML Losses
 if args.loss == 'Proxy_Anchor':
     criterion = losses.Proxy_Anchor(nb_classes = nb_classes, sz_embed = args.sz_embedding, mrg = args.mrg, alpha = args.alpha).cuda()
+if args.loss == 'AdaptiveProxyAnchorLoss':
+    criterion = losses.AdaptiveProxyAnchorLoss(nb_classes=nb_classes, sz_embed=args.sz_embedding, mrg=args.mrg,alpha=args.alpha\
+                                               nb_proxies=args.nb_proxies,scale_margin=args.scale_margin).cuda()
 elif args.loss == 'Proxy_NCA':
     criterion = losses.Proxy_NCA(nb_classes = nb_classes, sz_embed = args.sz_embedding).cuda()
 elif args.loss == 'MS':
