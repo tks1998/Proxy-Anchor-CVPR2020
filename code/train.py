@@ -230,6 +230,9 @@ if args.loss == 'Proxy_Anchor':
 if args.loss == 'AdaptiveProxyAnchorLoss':
     criterion = losses.AdaptiveProxyAnchorLoss(nb_classes=nb_classes, sz_embed=args.sz_embedding, mrg=args.mrg,alpha=args.alpha,\
                                                nb_proxies=args.nb_proxies,scale_margin=args.scale_margin).cuda()
+if args.loss == 'AdaptiveProxyAnchorLossAutoscale':
+    criterion = losses.AdaptiveProxyAnchorLossAutoscale(nb_classes=nb_classes, sz_embed=args.sz_embedding, mrg=args.mrg,alpha=args.alpha,\
+                                               nb_proxies=args.nb_proxies,scale_margin=args.scale_margin).cuda()
 elif args.loss == 'Proxy_NCA':
     criterion = losses.Proxy_NCA(nb_classes = nb_classes, sz_embed = args.sz_embedding).cuda()
 elif args.loss == 'MS':
