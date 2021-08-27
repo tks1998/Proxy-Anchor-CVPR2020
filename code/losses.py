@@ -99,7 +99,7 @@ class AdaptiveProxyAnchorLoss(torch.nn.Module):
         pos_term = torch.log(1 + P_sim_sum).sum() / num_valid_proxies
         neg_term = torch.log(1 + N_sim_sum).sum() / self.nb_classes
 
-        loss = pos_term + neg_term - self.scale_margin*(torch.mean(self.mrg))
+        loss = pos_term + neg_term + self.scale_margin*1/(torch.mean(self.mrg))
         return loss
 
 class AdaptiveProxyAnchorLossAutoscale(torch.nn.Module):
