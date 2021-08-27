@@ -250,7 +250,7 @@ param_groups = [
                  list(set(model.module.parameters()).difference(set(model.module.model.embedding.parameters())))},
     {'params': model.model.embedding.parameters() if args.gpu_id != -1 else model.module.model.embedding.parameters(), 'lr':float(args.lr) * 1},
 ]
-if args.loss == 'Proxy_Anchor':
+if args.loss in ['Proxy_Anchor','AdaptiveProxyAnchorLoss','AdaptiveProxyAnchorLossAutoscale']:
     param_groups.append({'params': criterion.proxies, 'lr':float(args.lr) * 100})
 
 # Optimizer Setting
@@ -306,7 +306,7 @@ for epoch in range(0, args.nb_epochs):
         loss.backward()
         
         torch.nn.utils.clip_grad_value_(model.parameters(), 10)
-        if args.loss == 'Proxy_Anchor':
+        if args.loss in ['Proxy_Anchor','AdaptiveProxyAnchorLoss','AdaptiveProxyAnchorLossAutoscale']:
             torch.nn.utils.clip_grad_value_(criterion.parameters(), 10)
 
         losses_per_epoch.append(loss.data.cpu().numpy())
