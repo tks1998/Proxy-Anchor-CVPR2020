@@ -230,6 +230,9 @@ if args.loss == 'Proxy_Anchor':
 if args.loss == 'AdaptiveProxyAnchorLoss':
     criterion = losses.AdaptiveProxyAnchorLoss(nb_classes=nb_classes, sz_embed=args.sz_embedding, mrg=args.mrg,alpha=args.alpha,\
                                                nb_proxies=args.nb_proxies,scale_margin=args.scale_margin).cuda()
+if args.loss == 'ProxyAnchor_Newton':
+    criterion = losses.ProxyAnchor_Newton(nb_classes = nb_classes, sz_embed = args.sz_embedding, alpha = args.alpha).cuda()
+
 if args.loss == 'AdaptiveProxyAnchorLossAutoscale':
     criterion = losses.AdaptiveProxyAnchorLossAutoscale(nb_classes=nb_classes, sz_embed=args.sz_embedding, mrg=args.mrg,alpha=args.alpha,\
                                                nb_proxies=args.nb_proxies,scale_margin=args.scale_margin).cuda()
@@ -250,7 +253,7 @@ param_groups = [
                  list(set(model.module.parameters()).difference(set(model.module.model.embedding.parameters())))},
     {'params': model.model.embedding.parameters() if args.gpu_id != -1 else model.module.model.embedding.parameters(), 'lr':float(args.lr) * 1},
 ]
-if args.loss in ['Proxy_Anchor','AdaptiveProxyAnchorLoss','AdaptiveProxyAnchorLossAutoscale']:
+if args.loss in ['Proxy_Anchor','AdaptiveProxyAnchorLoss','AdaptiveProxyAnchorLossAutoscale','ProxyAnchor_Newton']:
     param_groups.append({'params': criterion.proxies, 'lr':float(args.lr) * 100})
 
 # Optimizer Setting
@@ -306,7 +309,7 @@ for epoch in range(0, args.nb_epochs):
         loss.backward()
         
         torch.nn.utils.clip_grad_value_(model.parameters(), 10)
-        if args.loss in ['Proxy_Anchor','AdaptiveProxyAnchorLoss','AdaptiveProxyAnchorLossAutoscale']:
+        if args.loss in ['Proxy_Anchor','AdaptiveProxyAnchorLoss','AdaptiveProxyAnchorLossAutoscale','ProxyAnchor_Newton']:
             torch.nn.utils.clip_grad_value_(criterion.parameters(), 10)
 
         losses_per_epoch.append(loss.data.cpu().numpy())

@@ -147,13 +147,13 @@ class AdaptiveProxyAnchorLossAutoscale(torch.nn.Module):
         return loss
 
 class ProxyAnchor_Newton(torch.nn.Module):
-    def __init__(self, nb_classes, sz_embed, mrg=0.1, alpha=32, nb_proxies=1,scale_margin=10):
+    def __init__(self, nb_classes, sz_embed, alpha=32, nb_proxies=1,scale_margin=10):
         torch.nn.Module.__init__(self)
         # Proxy Anchor Initialization
         self.nb_classes = nb_classes
         self.sz_embed = sz_embed
-        self.mrg = torch.nn.Parameter(torch.tensor([mrg] * nb_classes, requires_grad=True, device='cuda',
-                                                   dtype=torch.double))  # -> mrg -> list[...nb_classes]
+        # self.mrg = torch.nn.Parameter(torch.tensor([mrg] * nb_classes, requires_grad=True, device='cuda',
+        #                                            dtype=torch.double))  # -> mrg -> list[...nb_classes]
         self.alpha = alpha
         self.nb_proxies = nb_proxies
         self.proxies_list = []
