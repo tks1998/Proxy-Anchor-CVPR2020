@@ -162,7 +162,7 @@ class ProxyAnchor_Newton(torch.nn.Module):
             self.proxies = torch.nn.Parameter(torch.randn(nb_classes, sz_embed).cuda())
             nn.init.kaiming_normal_(self.proxies, mode='fan_out')
             self.proxies_list.append(self.proxies)
-
+        self.proxies_list = torch.Tensor(self.proxies_list)
     def sim_matrix(a, b, eps=1e-8):
         """
         added eps for numerical stability
