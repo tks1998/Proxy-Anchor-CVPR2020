@@ -167,13 +167,13 @@ class ProxyAnchor_Newton(torch.nn.Module):
         P = self.proxies_list
 
         cos_list = [F.linear(l2_norm(X), l2_norm(P[i])) for i in range(self.nb_proxies)]
-        new_ton_cos_list = [F.linear(X, P[i])/torch.nn.functional.cosine_similarity(X, P[i]) for i in range(self.nb_proxies)]
+        new_ton_cos_list = [F.linear(X, P[i])/torch.nn.functional.cosine_similarity(X, P[i],dim=0) for i in range(self.nb_proxies)]
 
         tensor_sum_cos = torch.stack([i for i in cos_list])
         margin = torch.stack([i for i in new_ton_cos_list])
         _data_cos = torch.mean(tensor_sum_cos, dim=0)
         margin_mean = torch.stack([i for i in new_ton_cos_list])
-        print(margin_mean)
+        # print(margin_mean)
         P_one_hot = binarize(T=T, nb_classes=self.nb_classes)
         N_one_hot = 1 - P_one_hot
 
