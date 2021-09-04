@@ -146,6 +146,53 @@ class AdaptiveProxyAnchorLossAutoscale(torch.nn.Module):
         loss = pos_term + neg_term - self.scale_margin*(torch.mean(self.mrg))*(torch.abs(pos_term-neg_term))
         return loss
 
+class ProxyAnchor_Newton(torch.nn.Module):
+    def __init__(self, nb_classes, sz_embed, mrg=0.1, alpha=32, nb_proxies=1,scale_margin=10):
+        torch.nn.Module.__init__(self)
+        # Proxy Anchor Initialization
+        self.nb_classes = nb_classes
+        self.sz_embed = sz_embed
+        self.mrg = torch.nn.Parameter(torch.tensor([mrg] * nb_classes, requires_grad=True, device='cuda',
+                                                   dtype=torch.double))  # -> mrg -> list[...nb_classes]
+        self.alpha = alpha
+        self.nb_proxies = nb_proxies
+        self.proxies_list = []
+        self.scale_margin = scale_margin
+        for i in range(self.nb_proxies):
+            self.proxies = torch.nn.Parameter(torch.randn(nb_classes, sz_embed).cuda())
+            nn.init.kaiming_normal_(self.proxies, mode='fan_out')
+            self.proxies_list.append(self.proxies)
+
+    def forward(self, X, T):
+        P = self.proxies_list
+
+        cos_list = [F.linear(l2_norm(X), l2_norm(P[i])) for i in range(self.nb_proxies)]
+        new_ton_cos_list = [F.linear(X, P[i])/torch.nn.functional.cosine_similarity(X, P[i]) for i in range(self.nb_proxies)]
+
+        tensor_sum_cos = torch.stack([i for i in cos_list])
+        margin = torch.stack([i for i in new_ton_cos_list])
+        _data_cos = torch.mean(tensor_sum_cos, dim=0)
+        margin_mean = torch.stack([i for i in new_ton_cos_list])
+        print(margin_mean)
+        P_one_hot = binarize(T=T, nb_classes=self.nb_classes)
+        N_one_hot = 1 - P_one_hot
+
+        pos_exp = torch.exp(-self.alpha * (_data_cos - margin_mean))
+        neg_exp = torch.exp(self.alpha * (_data_cos + margin_mean))
+
+        with_pos_proxies = torch.nonzero(P_one_hot.sum(dim=0) != 0).squeeze(
+            dim=1)  # The set of positive proxies of data in the batch
+        num_valid_proxies = len(with_pos_proxies)  # The number of positive proxies
+
+        P_sim_sum = torch.where(P_one_hot == 1, pos_exp, torch.zeros_like(pos_exp)).sum(dim=0)
+        N_sim_sum = torch.where(N_one_hot == 1, neg_exp, torch.zeros_like(neg_exp)).sum(dim=0)
+
+        pos_term = torch.log(1 + P_sim_sum).sum() / num_valid_proxies
+        neg_term = torch.log(1 + N_sim_sum).sum() / self.nb_classes
+
+        loss = pos_term + neg_term
+        return loss
+
 # We use PyTorch Metric Learning library for the following codes.
 # Please refer to "https://github.com/KevinMusgrave/pytorch-metric-learning" for details.
 class Proxy_NCA(torch.nn.Module):
