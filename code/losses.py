@@ -163,17 +163,27 @@ class ProxyAnchor_Newton(torch.nn.Module):
             nn.init.kaiming_normal_(self.proxies, mode='fan_out')
             self.proxies_list.append(self.proxies)
 
+    def sim_matrix(a, b, eps=1e-8):
+        """
+        added eps for numerical stability
+        """
+        a_n, b_n = a.norm(dim=1)[:, None], b.norm(dim=1)[:, None]
+        a_norm = a / torch.max(a_n, eps * torch.ones_like(a_n))
+        b_norm = b / torch.max(b_n, eps * torch.ones_like(b_n))
+        sim_mt = torch.mm(a_norm, b_norm.transpose(0, 1))
+        return sim_mt
+
     def forward(self, X, T):
         P = self.proxies_list
 
         cos_list = [F.linear(l2_norm(X), l2_norm(P[i])) for i in range(self.nb_proxies)]
-        new_ton_cos_list = [F.linear(X, P[i])/torch.nn.functional.cosine_similarity(X, P[i],dim=0) for i in range(self.nb_proxies)]
+        new_ton_cos_list = [F.linear(X, P[i])/self.sim_matrix(X,P[i]) for i in range(self.nb_proxies)]
 
         tensor_sum_cos = torch.stack([i for i in cos_list])
         margin = torch.stack([i for i in new_ton_cos_list])
         _data_cos = torch.mean(tensor_sum_cos, dim=0)
         margin_mean = torch.stack([i for i in new_ton_cos_list])
-        # print(margin_mean)
+        print(margin_mean)
         P_one_hot = binarize(T=T, nb_classes=self.nb_classes)
         N_one_hot = 1 - P_one_hot
 
