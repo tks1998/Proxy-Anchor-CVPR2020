@@ -276,7 +276,7 @@ best_recall=[0]
 best_epoch = 0
 
 ### record ###
-df_margin = pd.DataFrame(columns = ['margin_'+str(i) for i in range(criterion.nb_classes]))
+df_margin = pd.DataFrame(columns = ['margin_'+str(i) for i in range(criterion.nb_classes)])
 for epoch in range(0, args.nb_epochs):
     model.train()
     bn_freeze = args.bn_freeze
