@@ -330,7 +330,7 @@ for epoch in range(0, args.nb_epochs):
         # print(criterion.mrg.detach().cpu().numpy().reshape(1,-1).shape)
         # print(criterion.mrg.detach().cpu().numpy().reshape(-1, ).shape)
         df_margin.loc[epoch] = criterion.mrg.detach().cpu().numpy().reshape(-1,)
-
+        df_margin.to_csv("record_margin.csv")
     wandb.log({'loss': losses_list[-1]}, step=epoch)
     scheduler.step()
     
@@ -373,7 +373,3 @@ for epoch in range(0, args.nb_epochs):
                 else:
                     for i in range(4):
                         f.write("Best Recall@{}: {:.4f}\n".format(10**i, best_recall[i] * 100))
-
-print("print ecord_margin")
-
-df_margin.to_csv("record_margin.csv")
