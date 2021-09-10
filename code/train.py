@@ -12,7 +12,7 @@ from torch.utils.data.dataloader import default_collate
 
 from tqdm import *
 import wandb
-
+import pandas as pd
 seed = 1
 random.seed(seed)
 np.random.seed(seed)
@@ -274,6 +274,8 @@ losses_list = []
 best_recall=[0]
 best_epoch = 0
 
+### record ###
+df_margin = pd.DataFrame(columns = ['margin_'+str(i) for i in range(criterion.nb_classes]))
 for epoch in range(0, args.nb_epochs):
     model.train()
     bn_freeze = args.bn_freeze
@@ -322,6 +324,9 @@ for epoch in range(0, args.nb_epochs):
                 loss.item()))
         
     losses_list.append(np.mean(losses_per_epoch))
+    if args.loss == 'AdaptiveProxyAnchorLoss':
+        df_margin.loc[i] = criterion.mrg.detach().cpu().numpy().reshape(1,-1)
+        df_margin.to_csv("record_margin.csv")
     wandb.log({'loss': losses_list[-1]}, step=epoch)
     scheduler.step()
     
