@@ -326,6 +326,7 @@ for epoch in range(0, args.nb_epochs):
         
     losses_list.append(np.mean(losses_per_epoch))
     if args.loss == 'AdaptiveProxyAnchorLoss':
+        print(criterion.mrg.detach().cpu().numpy().reshape(1,-1).shape)
         df_margin.loc[epoch] = criterion.mrg.detach().cpu().numpy().reshape(1,-1)
 
     wandb.log({'loss': losses_list[-1]}, step=epoch)
